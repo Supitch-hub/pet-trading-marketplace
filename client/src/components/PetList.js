@@ -1,17 +1,14 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../App';
 
 function PetList({ pets }) {
-    const { user } = useContext(AuthContext);
+    const { user } = React.useContext(AuthContext);
     const [favorites, setFavorites] = useState([]);
 
-    useEffect(() => {
-        if (user) fetchFavorites();
-    }, [user]);
-
-    const fetchFavorites = async () => {
+    const fetchFavorites = useCallback(async () => {
+        if (!user) return;
         try {
             const response = await axios.get('http://localhost:5000/api/favorites', {
                 headers: { Authorization: `Bearer ${user.token}` }
@@ -20,7 +17,11 @@ function PetList({ pets }) {
         } catch (error) {
             console.error('Error fetching favorites:', error);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (user) fetchFavorites();
+    }, [user, fetchFavorites]);
 
     const handleFavoriteToggle = async (petId) => {
         if (!user) {

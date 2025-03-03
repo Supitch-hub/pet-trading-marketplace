@@ -1,28 +1,27 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../App';
 
 function Login() {
+    const { login } = React.useContext(AuthContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useContext(AuthContext);
-    const navigate = useNavigate();
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:5000/api/login', { email, password });
-            login(response.data.token, response.data.user);
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('ล็อกอินล้มเหลว');
+            login(response.data.token, { id: response.data.id, username: response.data.username });
+        } catch (err) {
+            setError(err.response?.data?.error || 'เกิดข้อผิดพลาดในการล็อกอิน');
         }
     };
 
     return (
-        <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded-xl shadow-md">
-            <h2 className="text-2xl font-bold text-sky-800 mb-6 text-center">ล็อกอิน</h2>
+        <div className="bg-white p-6 rounded-xl shadow-md max-w-md mx-auto mt-8">
+            <h2 className="text-2xl font-semibold text-sky-800 mb-6">ล็อกอิน</h2>
+            {error && <p className="text-red-600 mb-4">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                     type="email"

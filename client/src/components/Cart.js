@@ -1,22 +1,14 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../App';
 
 function Cart() {
-    const { user } = useContext(AuthContext);
+    const { user } = React.useContext(AuthContext);
     const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-        fetchCart();
-    }, [user, navigate]);
-
-    const fetchCart = async () => {
+    const fetchCart = useCallback(async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/cart', {
                 headers: { Authorization: `Bearer ${user.token}` }
@@ -25,7 +17,15 @@ function Cart() {
         } catch (error) {
             console.error('Error fetching cart:', error);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        fetchCart();
+    }, [user, navigate, fetchCart]);
 
     const handleRemove = async (petId) => {
         try {

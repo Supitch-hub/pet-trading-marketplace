@@ -1,26 +1,18 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../App';
 
 function Profile() {
-    const { user } = useContext(AuthContext);
+    const { user } = React.useContext(AuthContext);
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [posts, setPosts] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState({});
-    const [errorMessage, setErrorMessage] = useState(''); // เพิ่ม state สำหรับ error
+    const [errorMessage, setErrorMessage] = useState('');
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-        fetchProfile();
-    }, [user, navigate]);
-
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/users/me', {
                 headers: { Authorization: `Bearer ${user.token}` }
@@ -31,7 +23,15 @@ function Profile() {
         } catch (error) {
             console.error('Error fetching profile:', error);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        fetchProfile();
+    }, [user, navigate, fetchProfile]);
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();
@@ -43,21 +43,21 @@ function Profile() {
         if (editForm.profile_image && editForm.profile_image instanceof File) {
             formData.append('profile_image', editForm.profile_image);
         } else if (editForm.profile_image) {
-            formData.append('profile_image', editForm.profile_image); // ถ้ามีค่าเดิม
+            formData.append('profile_image', editForm.profile_image);
         }
 
-        console.log('Sending data:', Object.fromEntries(formData)); // Log ข้อมูลที่ส่ง
+        console.log('Sending data:', Object.fromEntries(formData));
 
         try {
-            const response = await axios.put('http://localhost:5000/api/users/me', formData, {
+            await axios.put('http://localhost:5000/api/users/me', formData, {
                 headers: { 
                     Authorization: `Bearer ${user.token}`, 
                     'Content-Type': 'multipart/form-data' 
                 }
             });
             setIsEditing(false);
-            fetchProfile(); // รีเฟรชข้อมูลโปรไฟล์
-            setErrorMessage(''); // ล้าง error
+            fetchProfile();
+            setErrorMessage('');
         } catch (error) {
             console.error('Error updating profile:', error.response?.data || error.message);
             setErrorMessage(error.response?.data?.error || 'แก้ไขโปรไฟล์ล้มเหลว');
@@ -153,15 +153,14 @@ function Profile() {
                             </button>
                         </div>
                     </div>
-
                     <h3 className="text-2xl font-semibold text-sky-800 mb-4">โพสต์ของฉัน</h3>
                     {posts.length === 0 ? (
                         <p className="text-gray-500 text-center">คุณยังไม่มีโพสต์</p>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {posts.map(post => (
-                                <Link to={`/pets/${post.id}`} key={post.id}>
-                                    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300">
+                                <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300">
+                                    <Link to={`/pets/${post.id}`}>
                                         {post.image_url ? (
                                             <img src={`http://localhost:5000${post.image_url}`} alt={post.name} className="w-full h-48 object-cover" />
                                         ) : (
@@ -173,8 +172,8 @@ function Profile() {
                                             <p className="text-sky-600 font-medium mt-1">{post.price} บาท</p>
                                             <p className="text-gray-500 text-sm mt-2 line-clamp-2">{post.description}</p>
                                         </div>
-                                    </div>
-                                </Link>
+                                    </Link>
+                                </div>
                             ))}
                         </div>
                     )}

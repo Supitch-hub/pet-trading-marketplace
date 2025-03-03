@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../App';
 
 function PetDetail() {
     const { id } = useParams();
-    const { user } = useContext(AuthContext);
+    const { user } = React.useContext(AuthContext);
     const navigate = useNavigate();
     const [pet, setPet] = useState(null);
     const [reviews, setReviews] = useState([]);
@@ -15,12 +15,7 @@ function PetDetail() {
     const [editForm, setEditForm] = useState({});
     const [isFavorite, setIsFavorite] = useState(false);
 
-    useEffect(() => {
-        fetchPet();
-        if (user) checkFavorite();
-    }, [id, user]);
-
-    const fetchPet = async () => {
+    const fetchPet = useCallback(async () => {
         try {
             const response = await axios.get(`http://localhost:5000/api/pets/${id}`);
             setPet(response.data.pet);
@@ -29,9 +24,9 @@ function PetDetail() {
         } catch (error) {
             console.error('Error fetching pet:', error);
         }
-    };
+    }, [id]);
 
-    const checkFavorite = async () => {
+    const checkFavorite = useCallback(async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/favorites', {
                 headers: { Authorization: `Bearer ${user.token}` }
@@ -41,7 +36,12 @@ function PetDetail() {
         } catch (error) {
             console.error('Error checking favorite:', error);
         }
-    };
+    }, [user, id]);
+
+    useEffect(() => {
+        fetchPet();
+        if (user) checkFavorite();
+    }, [id, user, fetchPet, checkFavorite]);
 
     const handleFavoriteToggle = async () => {
         if (!user) {
@@ -230,8 +230,6 @@ function PetDetail() {
                                     ไม่มีรูปภาพ
                                 </div>
                             )}
-                            {/* คลิปสั้น (ถ้ามีในอนาคต) */}
-                            {/* <video src="..." controls className="w-full h-48 rounded-lg shadow-lg" /> */}
                         </div>
                         <div className="space-y-4">
                             <h2 className="text-4xl font-bold text-sky-800">{pet.name}</h2>
@@ -279,7 +277,6 @@ function PetDetail() {
                             </div>
                         </div>
                     </div>
-
                     <div className="mt-10">
                         <h3 className="text-2xl font-semibold text-sky-800 mb-4">รีวิว</h3>
                         {reviews.length === 0 ? (
@@ -296,7 +293,6 @@ function PetDetail() {
                             </div>
                         )}
                     </div>
-
                     {user && (
                         <form onSubmit={handleReviewSubmit} className="mt-8">
                             <h3 className="text-xl font-semibold text-sky-800 mb-2">เขียนรีวิว</h3>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // ลบ useContext ถ้าไม่ใช้
+import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import PetList from './components/PetList';
@@ -14,7 +14,7 @@ import SellerOrders from './components/SellerOrders';
 import Cart from './components/Cart';
 import AdminDashboard from './components/AdminDashboard';
 
-const AuthContext = React.createContext(); // ใช้แบบนี้แทน import useContext
+const AuthContext = React.createContext();
 
 function App() {
     const [pets, setPets] = useState([]);
@@ -26,38 +26,8 @@ function App() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    useEffect(() => {
-        fetchPets();
-        const token = localStorage.getItem('token');
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (token && storedUser) {
-            setUser({ token, id: storedUser.id, username: storedUser.username });
-        }
-    }, [fetchPets]); // เพิ่ม fetchPets เป็น dependency
-
-    useEffect(() => {
-        if (location.state?.refresh) {
-            fetchPets();
-            navigate(location.pathname, { replace: true, state: {} });
-        }
-    }, [location.state, fetchPets, navigate, location.pathname]); // เพิ่ม dependencies
-
-    const fetchPets = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/pets');
-            setPets(response.data);
-            applyFilters(response.data);
-        } catch (error) {
-            console.error('Error fetching pets:', error);
-        }
-    };
-
-    const addPet = (newPet) => {
-        setPets(prevPets => [...prevPets, newPet]);
-        applyFilters([...pets, newPet]);
-    };
-
-    const applyFilters = (petList) => {
+    // กำหนด applyFilters ก่อน fetchPets
+    const applyFilters = useCallback((petList) => {
         let filtered = [...petList];
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
@@ -69,6 +39,37 @@ function App() {
             filtered = filtered.filter(pet => pet.category.toLowerCase() === categoryFilter.toLowerCase());
         }
         setFilteredPets(filtered);
+    }, [searchQuery, categoryFilter]);
+
+    const fetchPets = useCallback(async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/pets');
+            setPets(response.data);
+            applyFilters(response.data); // เรียกใช้หลังกำหนด
+        } catch (error) {
+            console.error('Error fetching pets:', error);
+        }
+    }, [applyFilters]);
+
+    useEffect(() => {
+        fetchPets();
+        const token = localStorage.getItem('token');
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (token && storedUser) {
+            setUser({ token, id: storedUser.id, username: storedUser.username });
+        }
+    }, [fetchPets]);
+
+    useEffect(() => {
+        if (location.state?.refresh) {
+            fetchPets();
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state, fetchPets, navigate, location.pathname]);
+
+    const addPet = (newPet) => {
+        setPets(prevPets => [...prevPets, newPet]);
+        applyFilters([...pets, newPet]);
     };
 
     const handleSearch = (e) => {
@@ -101,7 +102,6 @@ function App() {
 
     return (
         <AuthContext.Provider value={{ user, login, logout }}>
-            {/* ส่วนอื่นๆ คงเดิม */}
             <div className="min-h-screen bg-gray-50">
                 <header className="bg-gradient-to-r from-sky-600 to-sky-800 text-white shadow-lg sticky top-0 z-20">
                     <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-4">

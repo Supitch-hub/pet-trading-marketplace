@@ -1,24 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../App';
 
 function Orders() {
-    const { user } = useContext(AuthContext);
+    const { user } = React.useContext(AuthContext);
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [selectedMethod, setSelectedMethod] = useState('');
     const [paymentProof, setPaymentProof] = useState(null);
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-        fetchOrders();
-    }, [user, navigate]);
-
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
@@ -27,7 +19,15 @@ function Orders() {
         } catch (error) {
             console.error('Error fetching orders:', error);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        fetchOrders();
+    }, [user, navigate, fetchOrders]);
 
     const handlePayment = async (orderId) => {
         if (!selectedMethod) {
@@ -69,6 +69,23 @@ function Orders() {
         }
     };
 
+    const handleCancelOrder = async (orderId) => {
+        if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อนี้?')) {
+            try {
+                await axios.put(
+                    `http://localhost:5000/api/orders/${orderId}/cancel`,
+                    {},
+                    { headers: { Authorization: `Bearer ${user.token}` } }
+                );
+                fetchOrders();
+                alert('ยกเลิกคำสั่งซื้อสำเร็จ');
+            } catch (error) {
+                console.error('Error cancelling order:', error);
+                alert('ยกเลิกคำสั่งซื้อล้มเหลว');
+            }
+        }
+    };
+
     if (!orders) return <div className="text-center py-8">Loading...</div>;
 
     return (
@@ -96,16 +113,18 @@ function Orders() {
                                             order.status === 'confirmed' ? 'ยืนยันการชำระเงินแล้ว' :
                                             order.status === 'shipped' ? 'จัดส่งแล้ว' :
                                             order.status === 'delivered' ? 'ถึงปลายทางแล้ว' :
-                                            order.status === 'completed' ? 'สำเร็จ' : 'ยกเลิก'
+                                            order.status === 'completed' ? 'สำเร็จ' :
+                                            order.status === 'cancelled' ? 'ยกเลิกแล้ว' : 'ไม่ทราบสถานะ'
                                         }</p>
                                         <p className="text-gray-600">สถานะการชำระเงิน: {
                                             order.payment_status === 'pending' ? 'รอชำระเงิน' :
                                             order.payment_status === 'submitted' ? 'ส่งหลักฐานแล้ว รอตรวจสอบ' :
-                                            order.payment_status === 'paid' ? 'ชำระเงินสำเร็จ' : 'ชำระเงินล้มเหลว'
+                                            order.payment_status === 'paid' ? 'ชำระเงินสำเร็จ' :
+                                            order.payment_status === 'failed' ? 'ชำระเงินล้มเหลว' : 'ไม่ทราบสถานะ'
                                         }</p>
                                     </div>
                                 </div>
-                                <div className="w-full md:w-auto">
+                                <div className="w-full md:w-auto flex flex-col gap-2">
                                     {order.status === 'pending_payment' && (
                                         <>
                                             <select
@@ -130,6 +149,12 @@ function Orders() {
                                                 className="w-full p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                                             >
                                                 ชำระเงิน
+                                            </button>
+                                            <button
+                                                onClick={() => handleCancelOrder(order.id)}
+                                                className="w-full p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                                            >
+                                                ยกเลิกคำสั่งซื้อ
                                             </button>
                                         </>
                                     )}

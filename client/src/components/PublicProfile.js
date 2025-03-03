@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, Link } from 'react-router-dom'; // ลบ useNavigate
 import axios from 'axios';
 
 function PublicProfile() {
@@ -7,11 +7,7 @@ function PublicProfile() {
     const [profile, setProfile] = useState(null);
     const [posts, setPosts] = useState([]);
 
-    useEffect(() => {
-        fetchProfile();
-    }, [id]);
-
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
         try {
             const response = await axios.get(`http://localhost:5000/api/users/${id}`);
             setProfile(response.data.user);
@@ -19,7 +15,11 @@ function PublicProfile() {
         } catch (error) {
             console.error('Error fetching public profile:', error);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchProfile();
+    }, [id, fetchProfile]);
 
     if (!profile) return <div className="text-center py-8">Loading...</div>;
 
@@ -45,15 +45,14 @@ function PublicProfile() {
                     <p className="text-gray-500 text-sm mt-1">สมัครเมื่อ: {new Date(profile.created_at).toLocaleDateString('th-TH')}</p>
                 </div>
             </div>
-
             <h3 className="text-2xl font-semibold text-sky-800 mb-4">โพสต์ของ {profile.username}</h3>
             {posts.length === 0 ? (
                 <p className="text-gray-500 text-center">ยังไม่มีโพสต์</p>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {posts.map(post => (
-                        <Link to={`/pets/${post.id}`} key={post.id}>
-                            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300">
+                            <Link to={`/pets/${post.id}`}>
                                 {post.image_url ? (
                                     <img src={`http://localhost:5000${post.image_url}`} alt={post.name} className="w-full h-48 object-cover" />
                                 ) : (
@@ -65,8 +64,8 @@ function PublicProfile() {
                                     <p className="text-sky-600 font-medium mt-1">{post.price} บาท</p>
                                     <p className="text-gray-500 text-sm mt-2 line-clamp-2">{post.description}</p>
                                 </div>
-                            </div>
-                        </Link>
+                            </Link>
+                        </div>
                     ))}
                 </div>
             )}
