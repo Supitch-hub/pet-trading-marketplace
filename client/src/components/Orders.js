@@ -12,7 +12,7 @@ function Orders() {
 
     const fetchOrders = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/orders', {
+            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setOrders(response.data);
@@ -40,7 +40,7 @@ function Orders() {
 
         try {
             await axios.put(
-                `http://localhost:5000/api/payments/${orderId}`,
+                `${process.env.REACT_APP_API_URL}/api/payments/${orderId}`,
                 formData,
                 { headers: { Authorization: `Bearer ${user.token}`, 'Content-Type': 'multipart/form-data' } }
             );
@@ -56,7 +56,7 @@ function Orders() {
         if (window.confirm('คุณได้รับสินค้าแล้วใช่หรือไม่?')) {
             try {
                 await axios.put(
-                    `http://localhost:5000/api/orders/${orderId}/delivered`,
+                    `${process.env.REACT_APP_API_URL}/api/orders/${orderId}/delivered`,
                     {},
                     { headers: { Authorization: `Bearer ${user.token}` } }
                 );
@@ -73,7 +73,7 @@ function Orders() {
         if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อนี้?')) {
             try {
                 await axios.put(
-                    `http://localhost:5000/api/orders/${orderId}/cancel`,
+                    `${process.env.REACT_APP_API_URL}/api/orders/${orderId}/cancel`,
                     {},
                     { headers: { Authorization: `Bearer ${user.token}` } }
                 );
@@ -100,7 +100,7 @@ function Orders() {
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div className="flex items-center gap-4">
                                     {order.image_url ? (
-                                        <img src={`http://localhost:5000${order.image_url}`} alt={order.name} className="w-20 h-20 object-cover rounded-lg" />
+                                        <img src={`${process.env.REACT_APP_API_URL}${order.image_url}`} alt={order.name} className="w-20 h-20 object-cover rounded-lg" />
                                     ) : (
                                         <div className="w-20 h-20 bg-gray-200 flex items-center justify-center text-gray-500 rounded-lg">ไม่มีรูปภาพ</div>
                                     )}

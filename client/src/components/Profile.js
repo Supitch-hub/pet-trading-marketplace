@@ -14,7 +14,7 @@ function Profile() {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/users/me', {
+            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/users/me', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setProfile(response.data.user);
@@ -49,7 +49,7 @@ function Profile() {
         console.log('Sending data:', Object.fromEntries(formData));
 
         try {
-            await axios.put('http://localhost:5000/api/users/me', formData, {
+            await axios.put('${process.env.REACT_APP_API_URL}/api/users/me', formData, {
                 headers: { 
                     Authorization: `Bearer ${user.token}`, 
                     'Content-Type': 'multipart/form-data' 
@@ -129,7 +129,7 @@ function Profile() {
                         <div className="flex-shrink-0">
                             {profile.profile_image ? (
                                 <img
-                                    src={`http://localhost:5000${profile.profile_image}`}
+                                    src={`${process.env.REACT_APP_API_URL}${profile.profile_image}`}
                                     alt={profile.username}
                                     className="w-32 h-32 rounded-full object-cover border-2 border-sky-600"
                                 />
@@ -162,7 +162,7 @@ function Profile() {
                                 <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300">
                                     <Link to={`/pets/${post.id}`}>
                                         {post.image_url ? (
-                                            <img src={`http://localhost:5000${post.image_url}`} alt={post.name} className="w-full h-48 object-cover" />
+                                            <img src={`${process.env.REACT_APP_API_URL}${post.image_url}`} alt={post.name} className="w-full h-48 object-cover" />
                                         ) : (
                                             <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">ไม่มีรูปภาพ</div>
                                         )}

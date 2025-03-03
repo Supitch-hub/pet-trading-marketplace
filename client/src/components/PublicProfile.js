@@ -9,7 +9,7 @@ function PublicProfile() {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/users/${id}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/${id}`);
             setProfile(response.data.user);
             setPosts(response.data.posts);
         } catch (error) {
@@ -29,7 +29,7 @@ function PublicProfile() {
                 <div className="flex-shrink-0">
                     {profile.profile_image ? (
                         <img
-                            src={`http://localhost:5000${profile.profile_image}`}
+                            src={`${process.env.REACT_APP_API_URL}${profile.profile_image}`}
                             alt={profile.username}
                             className="w-32 h-32 rounded-full object-cover border-2 border-sky-600"
                         />
@@ -54,7 +54,7 @@ function PublicProfile() {
                         <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300">
                             <Link to={`/pets/${post.id}`}>
                                 {post.image_url ? (
-                                    <img src={`http://localhost:5000${post.image_url}`} alt={post.name} className="w-full h-48 object-cover" />
+                                    <img src={`${process.env.REACT_APP_API_URL}${post.image_url}`} alt={post.name} className="w-full h-48 object-cover" />
                                 ) : (
                                     <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">ไม่มีรูปภาพ</div>
                                 )}

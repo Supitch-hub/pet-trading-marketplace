@@ -10,7 +10,7 @@ function Cart() {
 
     const fetchCart = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/cart', {
+            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/cart', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setCartItems(response.data);
@@ -29,7 +29,7 @@ function Cart() {
 
     const handleRemove = async (petId) => {
         try {
-            await axios.delete(`http://localhost:5000/api/cart/${petId}`, {
+            await axios.delete(`${process.env.REACT_APP_API_URL}/api/cart/${petId}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             fetchCart();
@@ -43,7 +43,7 @@ function Cart() {
         try {
             console.log('Starting checkout for user:', user.id);
             const response = await axios.post(
-                'http://localhost:5000/api/checkout',
+                '${process.env.REACT_APP_API_URL}/api/checkout',
                 {},
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -69,7 +69,7 @@ function Cart() {
                         <div key={item.id} className="p-4 bg-gray-50 rounded-lg shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div className="flex items-center gap-4">
                                 {item.image_url ? (
-                                    <img src={`http://localhost:5000${item.image_url}`} alt={item.name} className="w-20 h-20 object-cover rounded-lg" />
+                                    <img src={`${process.env.REACT_APP_API_URL}${item.image_url}`} alt={item.name} className="w-20 h-20 object-cover rounded-lg" />
                                 ) : (
                                     <div className="w-20 h-20 bg-gray-200 flex items-center justify-center text-gray-500 rounded-lg">ไม่มีรูปภาพ</div>
                                 )}

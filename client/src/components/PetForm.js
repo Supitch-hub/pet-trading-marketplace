@@ -33,7 +33,7 @@ function PetForm({ onAddPet }) {
 
         try {
             const response = await axios.post(
-                'http://localhost:5000/api/pets',
+                '${process.env.REACT_APP_API_URL}/api/pets',
                 formData,
                 { headers: { Authorization: `Bearer ${user.token}`, 'Content-Type': 'multipart/form-data' } }
             );
