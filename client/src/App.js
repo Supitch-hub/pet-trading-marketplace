@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect } from 'react'; // ลบ useContext ถ้าไม่ใช้
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import PetList from './components/PetList';
@@ -14,14 +14,12 @@ import SellerOrders from './components/SellerOrders';
 import Cart from './components/Cart';
 import AdminDashboard from './components/AdminDashboard';
 
-const AuthContext = createContext();
+const AuthContext = React.createContext(); // ใช้แบบนี้แทน import useContext
 
 function App() {
     const [pets, setPets] = useState([]);
     const [filteredPets, setFilteredPets] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [typeFilter, setTypeFilter] = useState('');
-    const [priceFilter, setPriceFilter] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
     const [user, setUser] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,14 +33,14 @@ function App() {
         if (token && storedUser) {
             setUser({ token, id: storedUser.id, username: storedUser.username });
         }
-    }, []);
+    }, [fetchPets]); // เพิ่ม fetchPets เป็น dependency
 
     useEffect(() => {
         if (location.state?.refresh) {
             fetchPets();
             navigate(location.pathname, { replace: true, state: {} });
         }
-    }, [location.state]);
+    }, [location.state, fetchPets, navigate, location.pathname]); // เพิ่ม dependencies
 
     const fetchPets = async () => {
         try {
@@ -66,12 +64,6 @@ function App() {
             filtered = filtered.filter(
                 pet => pet.name.toLowerCase().includes(lowerQuery) || pet.type.toLowerCase().includes(lowerQuery)
             );
-        }
-        if (typeFilter) {
-            filtered = filtered.filter(pet => pet.type.toLowerCase() === typeFilter.toLowerCase());
-        }
-        if (priceFilter) {
-            filtered = filtered.filter(pet => pet.price <= parseFloat(priceFilter));
         }
         if (categoryFilter) {
             filtered = filtered.filter(pet => pet.category.toLowerCase() === categoryFilter.toLowerCase());
@@ -109,6 +101,7 @@ function App() {
 
     return (
         <AuthContext.Provider value={{ user, login, logout }}>
+            {/* ส่วนอื่นๆ คงเดิม */}
             <div className="min-h-screen bg-gray-50">
                 <header className="bg-gradient-to-r from-sky-600 to-sky-800 text-white shadow-lg sticky top-0 z-20">
                     <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -172,7 +165,6 @@ function App() {
                         </nav>
                     </div>
                 </header>
-
                 <main className="max-w-7xl mx-auto px-4 py-8">
                     <Routes>
                         <Route path="/" element={<PetList pets={filteredPets} />} />
@@ -190,7 +182,6 @@ function App() {
                         <Route path="/about" element={<div className="p-6 text-center text-gray-700">เกี่ยวกับ Pet Market</div>} />
                     </Routes>
                 </main>
-
                 <footer className="bg-sky-100 py-6 text-center text-gray-600">
                     <p>© 2025 Pet Trading Market. All rights reserved.</p>
                 </footer>
