@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "pet-trading-market-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
