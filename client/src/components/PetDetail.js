@@ -17,7 +17,7 @@ function PetDetail() {
 
     const fetchPet = useCallback(async () => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/pets/${id}`);
+            const response = await axios.get(`/api/pets/${id}`);
             setPet(response.data.pet);
             setReviews(response.data.reviews);
             setEditForm(response.data.pet);
@@ -28,7 +28,7 @@ function PetDetail() {
 
     const checkFavorite = useCallback(async () => {
         try {
-            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/favorites', {
+            const response = await axios.get('/api/favorites', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             const isFav = response.data.some(fav => fav.id === parseInt(id));
@@ -50,13 +50,13 @@ function PetDetail() {
         }
         try {
             if (isFavorite) {
-                await axios.delete(`${process.env.REACT_APP_API_URL}/api/favorites/${id}`, {
+                await axios.delete(`/api/favorites/${id}`, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setIsFavorite(false);
             } else {
                 await axios.post(
-                    '${process.env.REACT_APP_API_URL}/api/favorites',
+                    '/api/favorites',
                     { pet_id: id },
                     { headers: { Authorization: `Bearer ${user.token}` } }
                 );
@@ -75,7 +75,7 @@ function PetDetail() {
         }
         try {
             await axios.post(
-                '${process.env.REACT_APP_API_URL}/api/cart',
+                '/api/cart',
                 { pet_id: parseInt(id) },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -90,7 +90,7 @@ function PetDetail() {
         if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบโพสต์นี้?')) {
             if (window.confirm('คุณแน่ใจจริงๆ หรือไม่? การลบนี้ไม่สามารถย้อนกลับได้')) {
                 try {
-                    await axios.delete(`${process.env.REACT_APP_API_URL}/api/pets/${id}`, {
+                    await axios.delete(`/api/pets/${id}`, {
                         headers: { Authorization: `Bearer ${user.token}` }
                     });
                     navigate('/', { replace: true, state: { refresh: true } });
@@ -114,7 +114,7 @@ function PetDetail() {
         if (editForm.image) formData.append('image', editForm.image);
 
         try {
-            await axios.put(`${process.env.REACT_APP_API_URL}/api/pets/${id}`, formData, {
+            await axios.put(`/api/pets/${id}`, formData, {
                 headers: { Authorization: `Bearer ${user.token}`, 'Content-Type': 'multipart/form-data' }
             });
             setIsEditing(false);
@@ -133,7 +133,7 @@ function PetDetail() {
         }
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_API_URL}/api/pets/${id}/reviews`,
+                `/api/pets/${id}/reviews`,
                 { rating: parseInt(rating), comment },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -220,7 +220,7 @@ function PetDetail() {
                         <div className="space-y-4">
                             {pet.image_url ? (
                                 <img
-                                    src={`${process.env.REACT_APP_API_URL}${pet.image_url}`}
+                                    src={`${pet.image_url}`}
                                     alt={pet.name}
                                     className="w-full h-96 object-cover rounded-lg shadow-lg"
                                     onError={(e) => e.target.src = 'https://via.placeholder.com/300'}

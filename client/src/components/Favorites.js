@@ -10,7 +10,7 @@ function Favorites() {
 
     const fetchFavorites = useCallback(async () => {
         try {
-            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/favorites', {
+            const response = await axios.get('/api/favorites', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setFavorites(response.data);
@@ -29,7 +29,7 @@ function Favorites() {
 
     const handleRemoveFavorite = async (petId) => {
         try {
-            await axios.delete(`${process.env.REACT_APP_API_URL}/api/favorites/${petId}`, {
+            await axios.delete(`/api/favorites/${petId}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setFavorites(favorites.filter(fav => fav.id !== petId));
@@ -52,7 +52,7 @@ function Favorites() {
                         <div key={fav.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300">
                             <Link to={`/pets/${fav.id}`}>
                                 {fav.image_url ? (
-                                    <img src={`${process.env.REACT_APP_API_URL}${fav.image_url}`} alt={fav.name} className="w-full h-48 object-cover" />
+                                    <img src={`${fav.image_url}`} alt={fav.name} className="w-full h-48 object-cover" />
                                 ) : (
                                     <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">ไม่มีรูปภาพ</div>
                                 )}

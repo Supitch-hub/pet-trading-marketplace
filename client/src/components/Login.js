@@ -11,7 +11,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('${process.env.REACT_APP_API_URL}/api/login', { email, password });
+            const response = await axios.post('/api/login', { email, password });
             login(response.data.token, { id: response.data.id, username: response.data.username });
         } catch (err) {
             setError(err.response?.data?.error || 'เกิดข้อผิดพลาดในการล็อกอิน');

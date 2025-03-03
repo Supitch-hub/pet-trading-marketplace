@@ -11,7 +11,7 @@ function AdminDashboard() {
 
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/users', {
+            const response = await axios.get('/api/users', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setUsers(response.data);
@@ -22,7 +22,7 @@ function AdminDashboard() {
 
     const fetchPosts = useCallback(async () => {
         try {
-            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/pets', {
+            const response = await axios.get('/api/pets', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setPosts(response.data);
@@ -43,7 +43,7 @@ function AdminDashboard() {
     const handleDeletePost = async (postId) => {
         if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบโพสต์นี้?')) {
             try {
-                await axios.delete(`${process.env.REACT_APP_API_URL}/api/pets/${postId}`, {
+                await axios.delete(`/api/pets/${postId}`, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 fetchPosts();

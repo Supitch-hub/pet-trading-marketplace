@@ -10,7 +10,7 @@ function SellerOrders() {
 
     const fetchOrders = useCallback(async () => {
         try {
-            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/seller/orders', {
+            const response = await axios.get('/api/seller/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setOrders(response.data);
@@ -29,7 +29,7 @@ function SellerOrders() {
 
     const handleVerifyPayment = async (orderId) => {
         try {
-            await axios.put(`${process.env.REACT_APP_API_URL}/api/payments/${orderId}/verify`, {}, {
+            await axios.put(`/api/payments/${orderId}/verify`, {}, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             fetchOrders();
@@ -43,7 +43,7 @@ function SellerOrders() {
     const handleShipping = async (orderId) => {
         try {
             await axios.put(
-                `${process.env.REACT_APP_API_URL}/api/orders/${orderId}/shipped`,
+                `/api/orders/${orderId}/shipped`,
                 {},
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -68,7 +68,7 @@ function SellerOrders() {
                         <div key={order.id} className="p-4 bg-gray-50 rounded-lg shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div className="flex items-center gap-4">
                                 {order.image_url ? (
-                                    <img src={`${process.env.REACT_APP_API_URL}${order.image_url}`} alt={order.name} className="w-20 h-20 object-cover rounded-lg" />
+                                    <img src={`${order.image_url}`} alt={order.name} className="w-20 h-20 object-cover rounded-lg" />
                                 ) : (
                                     <div className="w-20 h-20 bg-gray-200 flex items-center justify-center text-gray-500 rounded-lg">ไม่มีรูปภาพ</div>
                                 )}
@@ -86,7 +86,7 @@ function SellerOrders() {
                                         order.payment_status === 'paid' ? 'ชำระเงินสำเร็จ' : 'รอชำระ'
                                     }</p>
                                     {order.payment_proof && (
-                                        <a href={`${process.env.REACT_APP_API_URL}${order.payment_proof}`} target="_blank" rel="noreferrer" className="text-sky-600 hover:underline">ดูหลักฐานการชำระเงิน</a>
+                                        <a href={`${order.payment_proof}`} target="_blank" rel="noreferrer" className="text-sky-600 hover:underline">ดูหลักฐานการชำระเงิน</a>
                                     )}
                                 </div>
                             </div>
