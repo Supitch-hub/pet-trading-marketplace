@@ -43,7 +43,7 @@ function App() {
 
     const fetchPets = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/pets');
+            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/pets');
             setPets(response.data);
             applyFilters(response.data); // เรียกใช้หลังกำหนด
         } catch (error) {
