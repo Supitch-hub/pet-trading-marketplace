@@ -3,8 +3,12 @@ const { Pool } = require('pg');
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false
-    }
+        rejectUnauthorized: false,
+        require: true // บังคับใช้ SSL
+    },
+    max: 20, // จำนวน connection สูงสุด
+    idleTimeoutMillis: 30000, // ปิด connection ถ้าว่างนานเกิน 30 วินาที
+    connectionTimeoutMillis: 2000 // Timeout ถ้าเชื่อมต่อไม่ได้ใน 2 วินาที
 });
 
 pool.on('connect', () => {
