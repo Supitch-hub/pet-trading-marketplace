@@ -4,61 +4,76 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false,
-        require: true
+        require: true,
+        // เพิ่มการตั้งค่า SSL เพื่อแก้ปัญหา SASL
+        secureOptions: require('constants').SSL_OP_NO_TLSv1_2,
+        minVersion: 'TLSv1.2'
     },
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
-    // Add retry logic
+    connectionTimeoutMillis: 5000, // เพิ่มเวลา timeout
     retryDelay: 2000,
-    maxRetries: 3
+    maxRetries: 5
 });
 
-// Add connection test function
+// เพิ่มฟังก์ชันทดสอบการเชื่อมต่อแบบละเอียด
 const testConnection = async () => {
+    let client;
     try {
-        const client = await pool.connect();
-        console.log('Database connection test successful');
-        client.release();
+        client = await pool.connect();
+        await client.query('SELECT NOW()');
+        console.log('เชื่อมต่อฐานข้อมูลสำเร็จ');
         return true;
     } catch (err) {
-        console.error('Database connection test failed:', err.message);
+        console.error('เชื่อมต่อฐานข้อมูลล้มเหลว:', err.message);
         return false;
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 };
 
 pool.on('connect', () => {
-    console.log('Connected to Supabase database');
+    console.log('เชื่อมต่อกับ Supabase สำเร็จ');
 });
 
-pool.on('error', (err) => {
-    console.error('Unexpected error on idle client', err);
-    // Don't exit process immediately, try to recover
-    if (err.code === 'SASL_SIGNATURE_MISMATCH') {
-        console.log('Attempting to reconnect...');
-        testConnection();
-    } else {
+pool.on('error', async (err) => {
+    console.error('เกิดข้อผิดพลาดที่ client:', err);
+    try {
+        await testConnection();
+    } catch (error) {
+        console.error('ไม่สามารถเชื่อมต่อใหม่ได้:', error);
         process.exit(-1);
     }
 });
 
 const db = {
     query: async (text, params) => {
-        try {
-            const { rows } = await pool.query(text, params);
-            return [rows];
-        } catch (error) {
-            console.error('Database query error:', error);
-            // If it's a connection error, try to reconnect
-            if (error.code === 'SASL_SIGNATURE_MISMATCH') {
-                await testConnection();
+        let retries = 0;
+        const maxRetries = 3;
+
+        while (retries < maxRetries) {
+            try {
+                const { rows } = await pool.query(text, params);
+                return [rows];
+            } catch (error) {
+                console.error(`การเชื่อมต่อล้มเหลว ครั้งที่ ${retries + 1}:`, error);
+                retries++;
+                if (retries === maxRetries) {
+                    throw error;
+                }
+                // รอก่อนลองใหม่
+                await new Promise(resolve => setTimeout(resolve, 2000));
             }
-            throw error;
         }
     }
 };
 
-// Test connection on startup
-testConnection();
+// ทดสอบการเชื่อมต่อตอนเริ่มต้น
+testConnection().catch(err => {
+    console.error('ไม่สามารถเชื่อมต่อฐานข้อมูลได้:', err);
+    process.exit(1);
+});
 
 module.exports = db;
