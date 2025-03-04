@@ -9,24 +9,25 @@ const pool = new Pool({
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
-    retryDelay: 2000,
-    maxRetries: 5,
     // เพิ่มการตั้งค่าเพื่อบังคับใช้ IPv4
     family: 4
 });
 
-// เพิ่มฟังก์ชันทดสอบการเชื่อมต่อแบบละเอียด
+// ปรับปรุงฟังก์ชัน testConnection
 const testConnection = async () => {
     let client;
     try {
         client = await pool.connect();
-        await client.query('SELECT NOW()');
-        console.log('เชื่อมต่อฐานข้อมูลสำเร็จ');
+        const result = await client.query('SELECT NOW()');
+        console.log('เชื่อมต่อฐานข้อมูลสำเร็จ:', result.rows[0]);
         return true;
     } catch (err) {
         console.error('เชื่อมต่อฐานข้อมูลล้มเหลว:', err.message);
+        // ลองเชื่อมต่อใหม่ถ้าเป็นปัญหา network
         if (err.code === 'ENETUNREACH') {
-            console.log('กำลังลองเชื่อมต่อใหม่ผ่าน IPv4...');
+            console.log('กำลังลองเชื่อมต่อใหม่...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return testConnection();
         }
         return false;
     } finally {

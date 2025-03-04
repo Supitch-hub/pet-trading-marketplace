@@ -9,15 +9,26 @@ const db = require('./db');
 
 // Add database connection check
 const checkDatabaseConnection = async () => {
-    try {
-        await db.query('SELECT NOW()');
-        console.log('Database connection successful');
-    } catch (error) {
-        console.error('Database connection error:', error);
-        process.exit(1);
+    let retries = 0;
+    const maxRetries = 5;
+
+    while (retries < maxRetries) {
+        try {
+            await db.query('SELECT NOW()');
+            console.log('เชื่อมต่อฐานข้อมูลสำเร็จ');
+            return;
+        } catch (error) {
+            console.error(`เชื่อมต่อฐานข้อมูลล้มเหลว ครั้งที่ ${retries + 1}:`, error);
+            retries++;
+            if (retries === maxRetries) {
+                console.error('ไม่สามารถเชื่อมต่อฐานข้อมูลได้หลังจากลองหลายครั้ง');
+                process.exit(1);
+            }
+            // รอ 2 วินาทีก่อนลองใหม่
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
     }
 };
-
 const app = express();
 app.use(cors());
 app.use(express.json());
