@@ -3,8 +3,13 @@ const { Pool } = require('pg');
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false // อนุญาตให้เชื่อมต่อโดยไม่ตรวจสอบ certificate (เหมาะกับ Supabase)
-    }
+        rejectUnauthorized: false
+    },
+    host: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : 'localhost', // ดึง hostname จาก URL
+    port: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).port : 5432,
+    user: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).username : undefined,
+    password: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).password : undefined,
+    database: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).pathname.slice(1) : 'postgres'
 });
 
 const db = {
@@ -14,7 +19,7 @@ const db = {
             return [rows];
         } catch (error) {
             console.error('Database query error:', error);
-            throw error; // โยน error เพื่อให้ endpoint จัดการต่อ
+            throw error;
         }
     }
 };
