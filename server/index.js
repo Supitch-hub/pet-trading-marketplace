@@ -7,10 +7,24 @@ const path = require('path');
 const fs = require('fs');
 const db = require('./db');
 
+// Add database connection check
+const checkDatabaseConnection = async () => {
+    try {
+        await db.query('SELECT NOW()');
+        console.log('Database connection successful');
+    } catch (error) {
+        console.error('Database connection error:', error);
+        process.exit(1);
+    }
+};
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+
+// Initialize database connection
+checkDatabaseConnection();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'mySuperSecretKey123!@#PetTrading2025';
 
@@ -364,7 +378,7 @@ app.put('/api/payments/:order_id', authenticateToken, upload.single('payment_pro
     try {
         const [order] = await db.query('SELECT user_id, status FROM orders WHERE id = $1', [order_id]);
         if (!order[0] || order[0].user_id !== req.user.id) return res.status(403).json({ error: 'คุณไม่มีสิทธิ์ชำระเงินคำสั่งซื้อนี้' });
-        if (order[0].status !== 'pending_payment') return res.status(400).json({ error: 'คำสั่งซื้อนี้ไม่สามารถชำระเงินได้ในขณะนี้' });
+        if (order[0].status !== 'pending_payment') return res.status(400).json({ error: 'คำสั่งซื้อนี้ไม่สามาระเงินได้ในขณะนี้' });
 
         const paymentStatus = payment_method === 'bank_transfer' && payment_proof ? 'submitted' : 'paid';
         await db.query(
