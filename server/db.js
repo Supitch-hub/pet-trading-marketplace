@@ -1,13 +1,21 @@
 const { Pool } = require('pg');
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: {
+        rejectUnauthorized: false // อนุญาตให้เชื่อมต่อโดยไม่ตรวจสอบ certificate (เหมาะกับ Supabase)
+    }
 });
 
 const db = {
     query: async (text, params) => {
-        const { rows } = await pool.query(text, params);
-        return [rows]; // ปรับให้เข้ากับโค้ด MySQL เดิมที่คืน array
+        try {
+            const { rows } = await pool.query(text, params);
+            return [rows];
+        } catch (error) {
+            console.error('Database query error:', error);
+            throw error; // โยน error เพื่อให้ endpoint จัดการต่อ
+        }
     }
 };
 
