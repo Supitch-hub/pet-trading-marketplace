@@ -4,16 +4,15 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false,
-        require: true,
-        // เพิ่มการตั้งค่า SSL เพื่อแก้ปัญหา SASL
-        secureOptions: require('constants').SSL_OP_NO_TLSv1_2,
-        minVersion: 'TLSv1.2'
+        require: true
     },
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000, // เพิ่มเวลา timeout
+    connectionTimeoutMillis: 5000,
     retryDelay: 2000,
-    maxRetries: 5
+    maxRetries: 5,
+    // เพิ่มการตั้งค่าเพื่อบังคับใช้ IPv4
+    family: 4
 });
 
 // เพิ่มฟังก์ชันทดสอบการเชื่อมต่อแบบละเอียด
@@ -26,6 +25,9 @@ const testConnection = async () => {
         return true;
     } catch (err) {
         console.error('เชื่อมต่อฐานข้อมูลล้มเหลว:', err.message);
+        if (err.code === 'ENETUNREACH') {
+            console.log('กำลังลองเชื่อมต่อใหม่ผ่าน IPv4...');
+        }
         return false;
     } finally {
         if (client) {
