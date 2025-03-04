@@ -1,5 +1,13 @@
 const { Pool } = require('pg');
 
+// ตรวจสอบว่ามี DATABASE_URL ใน environment variables
+if (!process.env.DATABASE_URL) {
+    console.error('DATABASE_URL ไม่ได้ถูกกำหนด กรุณาตั้งค่า environment variable');
+    process.exit(1);
+}
+
+console.log('กำลังเชื่อมต่อกับ Supabase...');
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -8,8 +16,8 @@ const pool = new Pool({
     },
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-    // เพิ่มการตั้งค่าเพื่อบังคับใช้ IPv4
+    connectionTimeoutMillis: 10000, // เพิ่มเวลา timeout
+    // บังคับใช้ IPv4
     family: 4
 });
 
