@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../App';
 
 function PetForm({ onAddPet }) {
@@ -32,7 +32,7 @@ function PetForm({ onAddPet }) {
         if (image) formData.append('image', image);
 
         try {
-            const response = await axios.post(
+            const response = await api.post(
                 '/api/pets',
                 formData,
                 { headers: { Authorization: `Bearer ${user.token}`, 'Content-Type': 'multipart/form-data' } }

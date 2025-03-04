@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../App';
 
 function Favorites() {
@@ -10,7 +10,7 @@ function Favorites() {
 
     const fetchFavorites = useCallback(async () => {
         try {
-            const response = await axios.get('/api/favorites', {
+            const response = await api.get('/api/favorites', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setFavorites(response.data);
@@ -29,7 +29,7 @@ function Favorites() {
 
     const handleRemoveFavorite = async (petId) => {
         try {
-            await axios.delete(`/api/favorites/${petId}`, {
+            await api.delete(`/api/favorites/${petId}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setFavorites(favorites.filter(fav => fav.id !== petId));

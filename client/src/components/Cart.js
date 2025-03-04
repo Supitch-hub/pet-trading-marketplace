@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../App';
 
 function Cart() {
@@ -10,7 +10,7 @@ function Cart() {
 
     const fetchCart = useCallback(async () => {
         try {
-            const response = await axios.get('/api/cart', {
+            const response = await api.get('/api/cart', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setCartItems(response.data);
@@ -29,7 +29,7 @@ function Cart() {
 
     const handleRemove = async (petId) => {
         try {
-            await axios.delete(`/api/cart/${petId}`, {
+            await api.delete(`/api/cart/${petId}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             fetchCart();
@@ -42,7 +42,7 @@ function Cart() {
     const handleCheckout = async () => {
         try {
             console.log('Starting checkout for user:', user.id);
-            const response = await axios.post(
+            const response = await api.post(
                 '/api/checkout',
                 {},
                 { headers: { Authorization: `Bearer ${user.token}` } }

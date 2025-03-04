@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api'; // เปลี่ยนจาก axios
 import { AuthContext } from '../App';
 
 function PetList({ pets }) {
@@ -10,7 +10,7 @@ function PetList({ pets }) {
     const fetchFavorites = useCallback(async () => {
         if (!user) return;
         try {
-            const response = await axios.get('/api/favorites', {
+            const response = await api.get('/api/favorites', { // ใช้ api
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setFavorites(response.data.map(fav => fav.id));
@@ -30,16 +30,14 @@ function PetList({ pets }) {
         }
         try {
             if (favorites.includes(petId)) {
-                await axios.delete(`/api/favorites/${petId}`, {
+                await api.delete(`/api/favorites/${petId}`, { // ใช้ api
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setFavorites(favorites.filter(id => id !== petId));
             } else {
-                await axios.post(
-                    '/api/favorites',
-                    { pet_id: petId },
-                    { headers: { Authorization: `Bearer ${user.token}` } }
-                );
+                await api.post('/api/favorites', { pet_id: petId }, { // ใช้ api
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
                 setFavorites([...favorites, petId]);
             }
         } catch (error) {
@@ -59,7 +57,7 @@ function PetList({ pets }) {
                         <div key={pet.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300">
                             <Link to={`/pets/${pet.id}`}>
                                 {pet.image_url ? (
-                                    <img src={`${pet.image_url}`} alt={pet.name} className="w-full h-48 object-cover" />
+                                    <img src={`${process.env.REACT_APP_API_URL}${pet.image_url}`} alt={pet.name} className="w-full h-48 object-cover" />
                                 ) : (
                                     <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">ไม่มีรูปภาพ</div>
                                 )}

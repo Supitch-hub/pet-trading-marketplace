@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../App';
 
 function AdminDashboard() {
@@ -11,7 +11,7 @@ function AdminDashboard() {
 
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.get('/api/users', {
+            const response = await api.get('/api/users', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setUsers(response.data);
@@ -22,7 +22,7 @@ function AdminDashboard() {
 
     const fetchPosts = useCallback(async () => {
         try {
-            const response = await axios.get('/api/pets', {
+            const response = await api.get('/api/pets', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setPosts(response.data);
@@ -43,7 +43,7 @@ function AdminDashboard() {
     const handleDeletePost = async (postId) => {
         if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบโพสต์นี้?')) {
             try {
-                await axios.delete(`/api/pets/${postId}`, {
+                await api.delete(`/api/pets/${postId}`, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 fetchPosts();

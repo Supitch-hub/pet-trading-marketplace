@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api'; // เปลี่ยนจาก axios
 import { AuthContext } from '../App';
 
 function Login() {
@@ -11,7 +11,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/login', { email, password });
+            const response = await api.post('/api/login', { email, password }); // ใช้ api
             login(response.data.token, { id: response.data.id, username: response.data.username });
         } catch (err) {
             setError(err.response?.data?.error || 'เกิดข้อผิดพลาดในการล็อกอิน');

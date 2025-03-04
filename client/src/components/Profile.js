@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../App';
 
 function Profile() {
@@ -14,7 +14,7 @@ function Profile() {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const response = await axios.get('/api/users/me', {
+            const response = await api.get('/api/users/me', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setProfile(response.data.user);
@@ -49,7 +49,7 @@ function Profile() {
         console.log('Sending data:', Object.fromEntries(formData));
 
         try {
-            await axios.put('/api/users/me', formData, {
+            await api.put('/api/users/me', formData, {
                 headers: { 
                     Authorization: `Bearer ${user.token}`, 
                     'Content-Type': 'multipart/form-data' 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../App';
 
 function SellerOrders() {
@@ -10,7 +10,7 @@ function SellerOrders() {
 
     const fetchOrders = useCallback(async () => {
         try {
-            const response = await axios.get('/api/seller/orders', {
+            const response = await api.get('/api/seller/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setOrders(response.data);
@@ -29,7 +29,7 @@ function SellerOrders() {
 
     const handleVerifyPayment = async (orderId) => {
         try {
-            await axios.put(`/api/payments/${orderId}/verify`, {}, {
+            await api.put(`/api/payments/${orderId}/verify`, {}, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             fetchOrders();
@@ -42,7 +42,7 @@ function SellerOrders() {
 
     const handleShipping = async (orderId) => {
         try {
-            await axios.put(
+            await api.put(
                 `/api/orders/${orderId}/shipped`,
                 {},
                 { headers: { Authorization: `Bearer ${user.token}` } }

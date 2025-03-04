@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from './api'; // เปลี่ยนจาก axios
 import PetList from './components/PetList';
 import PetForm from './components/PetForm';
 import PetDetail from './components/PetDetail';
@@ -26,7 +26,6 @@ function App() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // กำหนด applyFilters ก่อน fetchPets
     const applyFilters = useCallback((petList) => {
         let filtered = [...petList];
         if (searchQuery) {
@@ -43,9 +42,9 @@ function App() {
 
     const fetchPets = useCallback(async () => {
         try {
-            const response = await axios.get('${process.env.REACT_APP_API_URL}/api/pets');
+            const response = await api.get('/api/pets'); // เปลี่ยนจาก axios
             setPets(response.data);
-            applyFilters(response.data); // เรียกใช้หลังกำหนด
+            applyFilters(response.data);
         } catch (error) {
             console.error('Error fetching pets:', error);
         }

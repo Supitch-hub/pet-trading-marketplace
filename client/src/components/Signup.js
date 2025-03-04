@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api'; // เปลี่ยนจาก axios
 
 function Signup() {
     const [username, setUsername] = useState('');
@@ -8,22 +8,24 @@ function Signup() {
     const [password, setPassword] = useState('');
     const [bio, setBio] = useState('');
     const [phone, setPhone] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/api/signup', { username, email, password, bio, phone });
+            await api.post('/api/signup', { username, email, password, bio, phone }); // ใช้ api และ endpoint
             navigate('/login');
         } catch (error) {
             console.error('Signup error:', error);
-            alert('สมัครสมาชิกล้มเหลว');
+            setError(error.response?.data?.error || 'สมัครสมาชิกล้มเหลว');
         }
     };
 
     return (
         <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded-xl shadow-md">
             <h2 className="text-2xl font-bold text-sky-800 mb-6 text-center">สมัครสมาชิก</h2>
+            {error && <p className="text-red-600 mb-4 text-center">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                     type="text"

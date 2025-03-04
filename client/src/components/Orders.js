@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../App';
 
 function Orders() {
@@ -12,7 +12,7 @@ function Orders() {
 
     const fetchOrders = useCallback(async () => {
         try {
-            const response = await axios.get('/api/orders', {
+            const response = await api.get('/api/orders', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setOrders(response.data);
@@ -39,7 +39,7 @@ function Orders() {
         if (paymentProof) formData.append('payment_proof', paymentProof);
 
         try {
-            await axios.put(
+            await api.put(
                 `/api/payments/${orderId}`,
                 formData,
                 { headers: { Authorization: `Bearer ${user.token}`, 'Content-Type': 'multipart/form-data' } }
@@ -55,7 +55,7 @@ function Orders() {
     const handleConfirmDelivery = async (orderId) => {
         if (window.confirm('คุณได้รับสินค้าแล้วใช่หรือไม่?')) {
             try {
-                await axios.put(
+                await api.put(
                     `/api/orders/${orderId}/delivered`,
                     {},
                     { headers: { Authorization: `Bearer ${user.token}` } }
@@ -72,7 +72,7 @@ function Orders() {
     const handleCancelOrder = async (orderId) => {
         if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อนี้?')) {
             try {
-                await axios.put(
+                await api.put(
                     `/api/orders/${orderId}/cancel`,
                     {},
                     { headers: { Authorization: `Bearer ${user.token}` } }

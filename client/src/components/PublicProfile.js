@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom'; // ลบ useNavigate
-import axios from 'axios';
+import api from '../api';
 
 function PublicProfile() {
     const { id } = useParams();
@@ -9,7 +9,7 @@ function PublicProfile() {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const response = await axios.get(`/api/users/${id}`);
+            const response = await api.get(`/api/users/${id}`);
             setProfile(response.data.user);
             setPosts(response.data.posts);
         } catch (error) {

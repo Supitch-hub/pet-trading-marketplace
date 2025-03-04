@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../App';
 
 function PetDetail() {
@@ -17,7 +17,7 @@ function PetDetail() {
 
     const fetchPet = useCallback(async () => {
         try {
-            const response = await axios.get(`/api/pets/${id}`);
+            const response = await api.get(`/api/pets/${id}`);
             setPet(response.data.pet);
             setReviews(response.data.reviews);
             setEditForm(response.data.pet);
@@ -28,7 +28,7 @@ function PetDetail() {
 
     const checkFavorite = useCallback(async () => {
         try {
-            const response = await axios.get('/api/favorites', {
+            const response = await api.get('/api/favorites', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             const isFav = response.data.some(fav => fav.id === parseInt(id));
@@ -50,12 +50,12 @@ function PetDetail() {
         }
         try {
             if (isFavorite) {
-                await axios.delete(`/api/favorites/${id}`, {
+                await api.delete(`/api/favorites/${id}`, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setIsFavorite(false);
             } else {
-                await axios.post(
+                await api.post(
                     '/api/favorites',
                     { pet_id: id },
                     { headers: { Authorization: `Bearer ${user.token}` } }
@@ -74,7 +74,7 @@ function PetDetail() {
             return;
         }
         try {
-            await axios.post(
+            await api.post(
                 '/api/cart',
                 { pet_id: parseInt(id) },
                 { headers: { Authorization: `Bearer ${user.token}` } }
@@ -90,7 +90,7 @@ function PetDetail() {
         if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบโพสต์นี้?')) {
             if (window.confirm('คุณแน่ใจจริงๆ หรือไม่? การลบนี้ไม่สามารถย้อนกลับได้')) {
                 try {
-                    await axios.delete(`/api/pets/${id}`, {
+                    await api.delete(`/api/pets/${id}`, {
                         headers: { Authorization: `Bearer ${user.token}` }
                     });
                     navigate('/', { replace: true, state: { refresh: true } });
@@ -114,7 +114,7 @@ function PetDetail() {
         if (editForm.image) formData.append('image', editForm.image);
 
         try {
-            await axios.put(`/api/pets/${id}`, formData, {
+            await api.put(`/api/pets/${id}`, formData, {
                 headers: { Authorization: `Bearer ${user.token}`, 'Content-Type': 'multipart/form-data' }
             });
             setIsEditing(false);
@@ -132,7 +132,7 @@ function PetDetail() {
             return;
         }
         try {
-            const response = await axios.post(
+            const response = await api.post(
                 `/api/pets/${id}/reviews`,
                 { rating: parseInt(rating), comment },
                 { headers: { Authorization: `Bearer ${user.token}` } }
